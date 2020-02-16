@@ -1,5 +1,5 @@
 provider "aws" {
-  version    = "=2.5"
+  version    = "=2.7"
   region     = "ap-southeast-1"
 }
 
@@ -39,6 +39,7 @@ resource "aws_instance" "host" {
   ami                    = "ami-0dad20bd1b9c8c004"
   instance_type          = "t2.micro"
   key_name               = "${aws_key_pair.auth.id}"
+  associate_public_ip_address = true
   subnet_id              = "${aws_subnet.default.id}"
   source_dest_check      = "false"
   vpc_security_group_ids = [
@@ -50,13 +51,21 @@ resource "aws_instance" "host" {
     "${aws_security_group.allow_egress.id}",
   ]
 
-  tags {
+  tags = {
     Name = "host"
   }
 
   provisioner "remote-exec" {
+    # connection {
+    #   user = "ubuntu"
+    #   host = "${aws_instance.host.public_ip}"
+    # }
     connection {
-      user = "ubuntu"
+      host = "${self.public_ip}"
+      type        = "ssh"
+      user        = "ubuntu"
+      timeout     = "500s"
+      private_key = "${file(var.private_key_path)}"
     }
 
     inline = [
@@ -71,6 +80,7 @@ resource "aws_instance" "vpn" {
   ami                    = "ami-0dad20bd1b9c8c004"
   instance_type          = "t2.micro"
   key_name               = "${aws_key_pair.auth.id}"
+  associate_public_ip_address = true
   subnet_id              = "${aws_subnet.default.id}"
   source_dest_check      = "false"
   vpc_security_group_ids = [
@@ -81,13 +91,21 @@ resource "aws_instance" "vpn" {
     "${aws_security_group.allow_egress.id}",
   ]
 
-  tags {
+  tags = {
     Name = "vpn"
   }
 
   provisioner "remote-exec" {
+    # connection {
+    #   user = "ubuntu"
+    #   host = "${aws_instance.vpn.public_ip}"
+    # }
     connection {
-      user = "ubuntu"
+      host = "${self.public_ip}"
+      type        = "ssh"
+      user        = "ubuntu"
+      timeout     = "500s"
+      private_key = "${file(var.private_key_path)}"
     }
 
     inline = [

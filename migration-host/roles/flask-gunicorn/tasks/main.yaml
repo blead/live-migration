@@ -1,10 +1,10 @@
 ---
 - name: Install python-dev, python-pip, and supervisor
-  apt: name={{ item }} update_cache=true state=installed
-  with_items:
-    - python-dev
-    - python-pip
-    - supervisor
+  apt:
+    name:
+      - python-dev
+      - python-pip
+      - supervisor
   become: true
 
 - name: Install Flask and Gunicorn

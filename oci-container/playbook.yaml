@@ -7,3 +7,4 @@
 - hosts: "{{ source | default('source') }}"
   roles:
   - container
+  - forward-ports

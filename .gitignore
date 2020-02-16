@@ -2,3 +2,5 @@ hosts
 playbook.retry
 .vscode/
 ansible.log
+.vagrant
+/script 
