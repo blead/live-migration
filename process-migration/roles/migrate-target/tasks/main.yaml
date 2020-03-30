@@ -1,16 +1,43 @@
 ---
-- name: Create migrate-target script
-  copy: src=migrate-target.py dest=/home/ubuntu/migrate-target.py owner=root group=root mode=0755
+
+- name: install pyyaml in pip (for reading config files)
+  pip:
+    executable: /usr/bin/pip3
+    name: pyyaml
+
+- name: Create start-page-server script
+  copy: 
+    src: start-page-server.py 
+    dest: /home/ubuntu/start-page-server.py 
+    owner: root 
+    group: root 
+    mode: "0755"
   become: true
+
+- name: Copy config file
+  copy: 
+    src: config.yaml
+    dest: /home/ubuntu/
 
 - name: Start rsync daemon
   command: rsync --daemon
   become: true
 
-- name: Execute migration target script
-  shell: "./migrate-target.py {{ hostvars[source].private_address }} >> migrate-target-log"
+# - name: Execute migration target script
+#   shell: "./migrate-target.py {{ hostvars[source].private_address }} >> migrate-target-log"
+#   args:
+#     chdir: /home/ubuntu
+#   become: true
+#   async: 2629800
+#   poll: 0
+
+- name: Start page server
+  shell: "./start-page-server.py"
   args:
     chdir: /home/ubuntu
   become: true
+  # to make script run in detached mode
   async: 2629800
   poll: 0
+
+

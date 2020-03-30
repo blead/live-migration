@@ -5,5 +5,5 @@
 
 - hosts: "{{ source | default('source') }}"
   roles:
-  - migrate-source
+  # - migrate-source
   # - reroute-traffic # using HAProxy instead?
