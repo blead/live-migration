@@ -27,11 +27,20 @@
   command: rsync --daemon
   become: true
 
-- name: Execute migration target script
-  shell: "./migrate-target.py {{ hostvars[source].private_address }} >> migrate-target-log"
+# - name: Execute migration target script
+#   shell: "./migrate-target.py {{ hostvars[source].private_address }} >> migrate-target-log"
+#   args:
+#     chdir: /home/ubuntu
+#   become: true
+#   async: 2629800
+#   poll: 0
+
+- name: Start page server
+  shell: "./start-page-server.py"
   args:
     chdir: /home/ubuntu
   become: true
+  # to make script run in detached mode
   async: 2629800
   poll: 0
 
