@@ -1,0 +1,24 @@
+#predump 
+mkdir /tmp/dump-mysql
+rm /tmp/dump-mysql/*
+time runc checkpoint  --image-path /tmp/dump-mysql --page-server 10.0.1.5:$MYSQLPAGE mysql > mysql-dump.log
+
+
+
+MYSQLPAGE=9091
+mkdir -p /tmp/predump-mysql
+rm /tmp/predump-mysql/*
+time runc checkpoint --pre-dump --image-path /tmp/predump-mysql --page-server 10.0.1.5:$MYSQLPAGE mysql
+
+
+WPPAGE=9090
+mkdir -p /tmp/predump-wp
+rm /tmp/predump-wp/*
+time runc checkpoint --pre-dump --image-path /tmp/predump-wp --page-server 10.0.1.5:$WPPAGE wordpress
+du -h /tmp/predump-wp/*
+
+WPPAGE=9090
+mkdir /tmp/dump-wordpress
+rm -f /tmp/dump-wordpress/*
+time runc checkpoint --image-path /tmp/dump-wordpress --page-server 10.0.1.5:$WPPAGE wordpress > wordpress-dump.log
+du -h /tmp/predump-wp/*

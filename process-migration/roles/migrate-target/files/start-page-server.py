@@ -20,6 +20,7 @@ def get_pageserver_cmd_and_port(container, port=None):
     if port is None:
         port = find_free_port()
     cmd = "criu page-server --images-dir {} --port {}".format(dir, port)
+    print(cmd)
     return cmd, port
 
 with open("config.yaml", 'r') as ymlfile:
