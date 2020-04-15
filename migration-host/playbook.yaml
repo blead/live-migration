@@ -42,14 +42,14 @@
 
 - hosts: "{{ source | default('source') }}"
   roles:
-  # - docker
-  # - criu
-  # # not needed if not generating image
-  # # - container-tools
-  # - networking-tools
-  # # - nfs-source
-  # - netns
-  # - pam-limits
-  # - memcached
-  # - flask-gunicorn
-  # - haproxy
+  - docker
+  - criu
+  # not needed if not generating image
+  # - container-tools
+  - networking-tools
+  # - nfs-source
+  - netns
+  - pam-limits
+  - memcached
+  - flask-gunicorn
+  - haproxy
