@@ -2,13 +2,13 @@
 - name: Start MySQL container
   # in case of use log, it can't dump the container
   # shell: runc run -d mysql > ../mysql.log < /dev/null
-  shell: runc run -d mysql & > /dev/null < /dev/null
+  shell: runc run -d mysql &>/dev/null </dev/null
   args:
     chdir: /home/ubuntu/mysql
   become: true
 
 - name: Start WordPress container
-  shell: runc run -d wordpress & > /dev/null < /dev/null
+  shell: runc run -d wordpress &>/dev/null </dev/null
   # shell: runc run -d wordpress > ../wordpress.log < /dev/null
   args:
     chdir: /home/ubuntu/wordpress

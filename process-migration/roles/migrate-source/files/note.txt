@@ -74,7 +74,7 @@ time runc checkpoint --image-path /tmp/dump-wordpress --page-server 10.0.1.5:$WP
 du -h /tmp/predump-wp/*
 
 
-============= interative dump normal SQL ===========
+============= iterative dump normal SQL ===========
 PATH_PREDUMP_SQL=/tmp/predump-mysql
 rm -rf $PATH_PREDUMP_SQL
 mkdir -p $PATH_PREDUMP_SQL
@@ -91,7 +91,7 @@ time rsync -a $PATH_DUMP_SQL/* 10.0.1.5::home/mysql/checkpoint
 
 time runc restore -d mysql
 
-============= interative dump normal WP ===========
+============= pre-dump normal WP ===========
 PATH_PREDUMP_WP=~/work/predump-wp
 rm -rf $PATH_PREDUMP_WP
 mkdir -p $PATH_PREDUMP_WP
@@ -100,7 +100,7 @@ du -h $PATH_PREDUMP_WP
 
 PATH_DUMP_WP=~/work/dump-wp
 rm -rf $PATH_DUMP_WP
-time runc --debug checkpoint  --image-path $PATH_DUMP_WP --parent-path $PATH_PREDUMP_WP wordpress
+time runc --debug checkpoint --image-path $PATH_DUMP_WP --parent-path $PATH_PREDUMP_WP wordpress
 du -h $PATH_DUMP_WP
 
 time rsync -rl $PATH_PREDUMP_WP 10.0.1.5::home/wordpress/checkpoint
@@ -117,6 +117,17 @@ du -h $PATH_DUMP_WP
 time rsync -rl $PATH_DUMP_WP/* 10.0.1.5::home/wordpress/checkpoint
 
 time runc --debug restore -d wordpress
+
+
+PATH_DUMP_WP=~/work/dump-mysql
+rm -rf $PATH_DUMP_WP
+time runc --debug checkpoint  --image-path $PATH_DUMP_WP mysql
+du -h $PATH_DUMP_WP
+
+time rsync -rl $PATH_DUMP_WP/* 10.0.1.5::home/mysql/checkpoint
+
+cd /home/ubuntu/mysql
+time runc --debug restore -d mysql
 =============== clear state =============
  umount $(mount | grep checkpoint | awk '{print $3}')
 

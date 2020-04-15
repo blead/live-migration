@@ -1,0 +1,28 @@
+SOURCE_IP=18.182.61.223
+DEST_IP=35.243.95.199
+HOST_FILE=infrastructure/aws-gcp-eval/hosts
+INFRA_DIR=infrastructure/aws-gcp-eval
+
+infra:
+	cd ${INFRA_DIR} && terraform apply
+	terraform output ansible_inventory > hosts
+	cd -
+
+vpn: 
+	ansible-playbook -i ${HOST_FILE} ipsec-vpn/playbook.yaml
+host:
+	ansible-playbook -i ${HOST_FILE} -e source=${SOURCE_IP} -e target=${DEST_IP} migration-host/playbook.yaml
+
+container:
+	time ansible-playbook -i ${HOST_FILE} -e source=$(SOURCE_IP) oci-container/playbook.yaml
+
+reset:
+	time ansible-playbook -i ${HOST_FILE} reset-environment/playbook.yaml
+
+migrate:
+	time ansible-playbook -v -i ${HOST_FILE} -e source=$(SOURCE_IP) -e target=${DEST_IP} process-migration/playbook.yaml
+
+migrate-pre-copy:
+	time ansible-playbook -v -i ${HOST_FILE} -e source=$(SOURCE_IP) -e target=${DEST_IP} -e precopy=true process-migration/playbook.yaml
+
+all: reset container
