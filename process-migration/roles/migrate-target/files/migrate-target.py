@@ -12,10 +12,14 @@ HOST = ''   # Symbolic name meaning all available interfaces
 PORT = 8888 # Arbitrary non-privileged port
 
 if len(sys.argv) < 2:
-  print 'Usage: ' + sys.argv[0] + ' <source>'
+  print 'Usage: ' + sys.argv[0] + ' <source>' + ' [page_server]'
   sys.exit(1)
 
 source_addr = sys.argv[1]
+
+pageserver_enabled = False
+if len(sys.argv) > 2:
+  pageserver_enabled = distutils.util.strtobool(sys.argv[2])
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print 'Socket created'

@@ -1,13 +1,9 @@
 ---
-
-- name: Create migrate-target script
-  copy: src=migrate-target.py dest=/home/ubuntu/migrate-target.py owner=root group=root mode=0755
-  become: true
-
 # - name: install pyyaml in pip (for reading config files)
 #   pip:
 #     executable: /usr/bin/pip3
 #     name: pyyaml
+#   when: "{{ pageserver | default('false') }}"
 
 # - name: Create start-page-server script
 #   copy: 
@@ -17,11 +13,27 @@
 #     group: root 
 #     mode: "0755"
 #   become: true
+#   when: "{{ pageserver | default('false') }}"
 
-- name: Copy config file
-  copy: 
-    src: config.yaml
-    dest: /home/ubuntu/
+# - name: Copy config file
+#   copy: 
+#     src: config.yaml
+#     dest: /home/ubuntu/
+#   when: "{{ pageserver | default('false') }}"
+
+- name: Start page server
+  shell: "./start-page-server.py"
+  args:
+    chdir: /home/ubuntu
+  become: true
+  when: "{{ pageserver | default('false') }}"
+  # to make script run in detached mode
+  async: 2629800
+  poll: 0
+
+- name: Create migrate-target script
+  copy: src=migrate-target.py dest=/home/ubuntu/migrate-target.py owner=root group=root mode=0755
+  become: true
 
 - name: Start rsync daemon
   command: rsync --daemon
@@ -35,13 +47,6 @@
   async: 2629800
   poll: 0
 
-# - name: Start page server
-#   shell: "./start-page-server.py"
-#   args:
-#     chdir: /home/ubuntu
-#   become: true
-#   # to make script run in detached mode
-#   async: 2629800
-#   poll: 0
+
 
 
