@@ -1,6 +1,10 @@
 ---
+# - name: Create migrate-source script
+#   copy: src=sequential-migrate-source.py dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
+#   become: true
+
 - name: Create migrate-source script
-  copy: src=migrate-source.py dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
+  copy: src=migrate-source.py.bak dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
   become: true
 
 - name: Migrate MySQL and WordPress
@@ -20,9 +24,9 @@
   delay: 1
   changed_when: false
 
-- name: HAProxy - Disable redir
-  shell: echo "disable server back1/redir" | socat unix-connect:/var/run/haproxy/admin.sock stdio
-  become: true
+# - name: HAProxy - Disable redir
+#   shell: echo "disable server back1/redir" | socat unix-connect:/var/run/haproxy/admin.sock stdio
+#   become: true
 
 - name: Display migration result
   debug: var=migration_result.stdout_lines

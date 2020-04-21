@@ -168,11 +168,11 @@ if precopy_enabled:
 
 print 'CHECKPOINT'
 downtime_start = time.time()
-## Start our dummy server here
-subprocess.call('echo "enable server back1/redir" | \
-  socat unix-connect:/var/run/haproxy/admin.sock stdio', shell=True)
-subprocess.call('echo "disable server back1/source" | \
-  socat unix-connect:/var/run/haproxy/admin.sock stdio', shell=True)
+# ## Start our dummy server here
+# subprocess.call('echo "enable server back1/redir" | \
+#   socat unix-connect:/var/run/haproxy/admin.sock stdio', shell=True)
+# subprocess.call('echo "disable server back1/source" | \
+#   socat unix-connect:/var/run/haproxy/admin.sock stdio', shell=True)
 for (container, postcopy_port) in zip(containers, postcopy_ports):
   checkpoint(container, postcopy_port)
 

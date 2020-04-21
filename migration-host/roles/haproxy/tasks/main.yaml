@@ -6,5 +6,18 @@
   become: true
 
 - name: Create /etc/haproxy/haproxy.cfg
-  copy: src=haproxy.cfg.j2 dest=/etc/haproxy/haproxy.cfg owner=root group=root mode=0755
+  template: 
+    src: haproxy.cfg.j2 
+    dest: /etc/haproxy/haproxy.cfg 
+    owner: root 
+    group: root 
+    mode: "0755"
   become: true
+  notify: 
+    - restart haproxy
+
+- name: ensure haproxy is running
+  service:
+    name: haproxy
+    state: started
+    

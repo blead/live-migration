@@ -1,4 +1,32 @@
 ---
+# - hosts: "{{ target | default('target') }}"
+#   roles:
+#   - docker
+#   - criu
+#   - networking-tools
+#   # - nfs-target
+#   - rsync-daemon
+#   - netns
+#   - pam-limits
+#   - memcached
+#   - flask-gunicorn
+#   - haproxy
+
+# - hosts: "{{ source | default('source') }}"
+#   roles:
+#   - docker
+#   - criu
+#   # not needed if not generating image
+#   # - container-tools
+#   - networking-tools
+#   # - nfs-source
+#   - netns
+#   - pam-limits
+#   - memcached
+#   - flask-gunicorn
+#   - haproxy
+
+
 - hosts: "{{ target | default('target') }}"
   roles:
   - docker
@@ -10,7 +38,7 @@
   - pam-limits
   - memcached
   - flask-gunicorn
-  - haproxy
+  # - haproxy
 
 - hosts: "{{ source | default('source') }}"
   roles:

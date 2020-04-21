@@ -61,7 +61,7 @@ backend back1
 	server redir 127.0.0.1:12345 backup disabled
 	server source 10.200.1.5:80 check
 	{% for host in groups['host'] %}}
-	{% if not ansible_hostname == hostvars[host].ansible_hostname %}
+	{% if not ansible_hostname == hostvars[host].ansible_facts.ansible_hostname %}
 	server target {{ hostvars[host].private_address }}:80 check
 	{% endif %}
 	{% endfor %}
