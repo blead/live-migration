@@ -14,7 +14,7 @@ def find_free_port():
         return s.getsockname()[1]
 
 def get_pageserver_cmd_and_port(container, port=None):
-    dir = "{}{}/checkpoint".format(BASE_PATH, container)
+    dir = "{}/{}/checkpoint".format(BASE_PATH, container)
     path = pathlib.Path(dir)
     path.mkdir(parents=True, exist_ok=True)
     if port is None:

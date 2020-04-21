@@ -3,12 +3,24 @@
 #   copy: src=sequential-migrate-source.py dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
 #   become: true
 
+# - name: Create migrate-source script
+#   copy: src=sequential-migrate-source-ps.py dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
+#   become: true
+
 - name: Create migrate-source script
-  copy: src=migrate-source.py.bak dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
+  copy: src=unscheduled-migrate-source-ps.py dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
   become: true
 
+# - name: Create migrate-source script
+#   copy: src=unscheduled-migrate-source.py dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
+#   become: true
+
+# - name: Create migrate-source script
+#   copy: src=migrate-source.py.bak dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
+#   become: true
+
 - name: Migrate MySQL and WordPress
-  command: "./migrate-source.py mysql,wordpress {{ hostvars[target].private_address }} {{ precopy | default('false') }} {{ postcopy | default('false') }} 8027"
+  command: "./migrate-source.py mysql,wordpress {{ hostvars[target].private_address }} {{ precopy | default('false') }} {{ pageserver | default('false') }} 8027"
   args:
     chdir: /home/ubuntu
   environment:

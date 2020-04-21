@@ -25,4 +25,7 @@ migrate:
 migrate-pre-copy:
 	time ansible-playbook -v -i ${HOST_FILE} -e source=$(SOURCE_IP) -e target=${DEST_IP} -e precopy=true process-migration/playbook.yaml
 
+migrate-page-server:
+	time ansible-playbook -v -i ${HOST_FILE} -e source=$(SOURCE_IP) -e target=${DEST_IP} -e pageserver=true process-migration/playbook.yaml
+
 all: reset container
