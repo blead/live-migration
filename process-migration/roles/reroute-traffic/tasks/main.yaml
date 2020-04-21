@@ -1,6 +1,9 @@
 ---
 - name: Configure sysctl.conf - ip_forward
-  sysctl: name=net.ipv4.ip_forward value=1 state=present
+  sysctl: 
+    name: net.ipv4.ip_forward 
+    value: 1 
+    state: present
   become: true  
 
 - name: Configure DNAT

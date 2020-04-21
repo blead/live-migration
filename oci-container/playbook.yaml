@@ -2,8 +2,9 @@
 - hosts: host
   roles:
   - image
-  # - forward-ports
+  - forward-ports
 
 - hosts: "{{ source | default('source') }}"
   roles:
   - container
+  - forward-ports

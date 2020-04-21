@@ -19,10 +19,8 @@ postcopy_port_start = 8027
 postcopy_pipe_prefix = '/tmp/postcopy-pipe-'
 target_port = 8888
 
-
-## Extract Auguments
 if len(sys.argv) < 3:
-  print('Usage: ' + sys.argv[0] + ' <container1>[,<containers2>,...] <target-address> [pre-copy] [post-copy] [post-copy-port-start]')
+  print 'Usage: ' + sys.argv[0] + ' <container1>[,<containers2>,...] <target-address> [pre-copy] [post-copy] [post-copy-port-start]'
   sys.exit(1)
 
 containers = sys.argv[1].split(',')
@@ -33,15 +31,13 @@ if len(sys.argv) > 4:
   postcopy_enabled = distutils.util.strtobool(sys.argv[4])
 if len(sys.argv) > 5:
   postcopy_port_start = int(sys.argv[5])
-postcopy_ports = [postcopy_port_start + i for i in range(len(containers))]
+postcopy_ports = [postcopy_port_start + i for i in xrange(len(containers))]
 queue = multiprocessing.queues.SimpleQueue()
 
-
-## Define functionsa
 def error(error):
-  print('Error: ' + error)
+  print 'Error: ' + error
   if error:
-    print(error)
+    print error
   sys.exit(1)
 
 def predump(container):
@@ -53,16 +49,15 @@ def predump(container):
   process = subprocess.Popen(cmd, shell=True)
   ret = process.wait()
   end = time.time()
-  print('%s: predump finished after %.2f second(s) with exit code %d' % (container, end - start, ret))
+  print '%s: predump finished after %.2f second(s) with exit code %d' % (container, end - start, ret)
   eval_process = subprocess.Popen('du -sh ' + container_path + '/' + precopy_dir, shell=True, stdout=subprocess.PIPE)
   size, stderr = eval_process.communicate()
-  print('%s: predump size %s' % (container, size))
+  print '%s: predump size %s' % (container, size)
   os.chdir(old_cwd)
   if ret != 0 or stderr:
     error(container + ' predump failed.')
 
-def checkpoint(xxx_todo_changeme):
-  (container, postcopy_port) = xxx_todo_changeme
+def checkpoint((container, postcopy_port)):
   container_path = base_path + container
   postcopy_pipe_path = postcopy_pipe_prefix + container
   old_cwd = os.getcwd()
@@ -85,15 +80,15 @@ def checkpoint(xxx_todo_changeme):
     pipe = os.open(postcopy_pipe_path, os.O_RDONLY)
     ret = os.read(pipe, 1)
     if ret == '\0':
-      print(container + ': ready for lazy page transfer')
+      print container + ': ready for lazy page transfer'
     ret = 0
   else:
     ret = process.wait()
   end = time.time()
-  print('%s: checkpoint finished after %.2f second(s) with exit code %d' % (container, end - start, ret))
+  print '%s: checkpoint finished after %.2f second(s) with exit code %d' % (container, end - start, ret)
   eval_process = subprocess.Popen('du -sh ' + container_path + '/checkpoint', shell=True, stdout=subprocess.PIPE)
   size, stderr = eval_process.communicate()
-  print('%s: checkpoint size %s' % (container, size))
+  print '%s: checkpoint size %s' % (container, size)
   os.chdir(old_cwd)
   if ret != 0 or stderr:
     error(container + ' checkpoint failed.')
@@ -102,21 +97,21 @@ def transfer(container):
   container_path = base_path + container
   eval_process = subprocess.Popen('du -sh ' + container_path, shell=True, stdout=subprocess.PIPE)
   size, stderr = eval_process.communicate()
-  print('%s: total size (container + predump) %s' % (container, size))
+  print '%s: total size (container + predump) %s' % (container, size)
   cmd = 'rsync -aq %s %s::home' % (container_path, target_address)
-  print('%s: transferring predump to %s::%s' % (container, target_address, container_path))
+  print '%s: transferring predump to %s::%s' % (container, target_address, container_path)
   start = time.time()
   process = subprocess.Popen(cmd, shell=True)
   ret = process.wait()
   end = time.time()
-  print('%s: predump transfer time %.2f seconds' % (container, end - start))
+  print '%s: predump transfer time %.2f seconds' % (container, end - start)
   if ret != 0 or stderr:
     error(container + ' transfer failed.')
 
 def calculate_size(container):
   container_path = base_path + container
   cmd = 'rsync -a --dry-run --stats %s %s::home' % (container_path, target_address)
-  print(container + ': evaluating checkpoint transfer size')
+  print container + ': evaluating checkpoint transfer size'
   start = time.time()
   process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
   ret, stderr = process.communicate()
@@ -125,15 +120,15 @@ def calculate_size(container):
     error(container + ' size calculation failed.')
   size = int(match.group(1).replace(',', ''))
   end = time.time()
-  print('%s: total checkpoint transfer size %d bytes' % (container, size))
-  print('%s: checkpoint transfer size calculation time %.2f seconds' % (container, end - start))
+  print '%s: total checkpoint transfer size %d bytes' % (container, size)
+  print '%s: checkpoint transfer size calculation time %.2f seconds' % (container, end - start)
   return size
 
 def measured_transfer(container, total_size, target_size, postcopy_port):
   sent_flag = False
   container_path = base_path + container
   cmd = 'rsync -a --info=progress2 %s %s::home' % (container_path, target_address)
-  print('%s: transferring checkpoint to %s::%s' % (container, target_address, container_path))
+  print '%s: transferring checkpoint to %s::%s' % (container, target_address, container_path)
   start = time.time()
   process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, universal_newlines=True)
   previous_time = start
@@ -153,7 +148,7 @@ def measured_transfer(container, total_size, target_size, postcopy_port):
         break
   ret = process.wait()
   end = time.time()
-  print('%s: checkpoint transfer time %.2f seconds' % (container, end - start))
+  print '%s: checkpoint transfer time %.2f seconds' % (container, end - start)
   if not sent_flag:
     queue.put(ret)
   elif ret != 0:
@@ -177,47 +172,44 @@ def notify(container, postcopy_port):
       break
     for s in inputready:
       answer = s.recv(1024)
-      print(container + ': ' + answer)
+      print container + ': ' + answer
   end = time.time()
-  print('%s: target notification time %.2f seconds' % (container, end - start))
+  print '%s: target notification time %.2f seconds' % (container, end - start)
 
-#Declare pool for threading
 pool = multiprocessing.Pool(processes=len(containers))
 
-## Main
 if precopy_enabled:
-  print('>> PREDUMP')
+  print 'PREDUMP'
   pool.map(predump, containers)
-  print('>> PREDUMP TRANSFER')
+  print 'PREDUMP TRANSFER'
   pool.map(transfer, containers)
 
-print('>> CHECKPOINT')
+print 'CHECKPOINT'
 downtime_start = time.time()
 ## Start our dummy server here
-# Config HA Proxy for something???
-subprocess.call('echo "enable server back1/redir" | \
-  socat unix-connect:/var/run/haproxy/admin.sock stdio', shell=True)
-subprocess.call('echo "disable server back1/source" | \
-  socat unix-connect:/var/run/haproxy/admin.sock stdio', shell=True)
-pool.map(checkpoint, list(zip(containers, postcopy_ports)))
+# subprocess.call('echo "enable server back1/redir" | \
+#   socat unix-connect:/var/run/haproxy/admin.sock stdio', shell=True)
+# subprocess.call('echo "disable server back1/source" | \
+#   socat unix-connect:/var/run/haproxy/admin.sock stdio', shell=True)
+pool.map(checkpoint, zip(containers, postcopy_ports))
 
-print('>> CALCULATE')
+print 'CALCULATE'
 container_sizes = pool.map(calculate_size, containers)
 transfer_tasks = list(reversed(sorted(zip(containers, container_sizes, postcopy_ports), key=lambda x: x[1])))
 
-print('>> CHECKPOINT TRANSFER + NOTIFY')
+print 'CHECKPOINT TRANSFER + NOTIFY'
 transfer_results = []
 for (index, (container, size, postcopy_port)) in enumerate(transfer_tasks):
   target_size = 0
   if index + 1 < len(transfer_tasks):
     target_size = transfer_tasks[index + 1][1]
-  print('Starting transfer of ' + container)
+  print 'Starting transfer of ' + container
   result = pool.apply_async(measured_transfer, (container, size, target_size, postcopy_port))
-  print('Waiting for transfer of ' + container)
+  print 'Waiting for transfer of ' + container
   ret = queue.get()
   if (ret != 0):
     error(container + ' measured transfer failed.')
   transfer_results.append(result)
 [result.wait() for result in transfer_results]
 downtime_end = time.time()
-print('Total downtime: %.2f second(s)' % (downtime_end - downtime_start))
+print 'Total downtime: %.2f second(s)' % (downtime_end - downtime_start)

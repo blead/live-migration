@@ -1,0 +1,7 @@
+containers:
+  - name: wordpress
+    pageserver:
+      port: 9090
+  - name: mysql
+    pageserver:
+      port: 9091

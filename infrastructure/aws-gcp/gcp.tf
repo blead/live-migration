@@ -45,7 +45,7 @@ resource "google_compute_address" "vpn" {
 resource "google_compute_instance" "host" {
   name         = "host2"
   machine_type = "n1-standard-1"
-  allow_stopping_for_update = "TRUE"
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
@@ -55,13 +55,21 @@ resource "google_compute_instance" "host" {
 
   network_interface {
     subnetwork    = "${google_compute_subnetwork.live_migration.self_link}"
-    access_config = {
+    access_config {
     }
   }
 
   provisioner "remote-exec" {
+    # connection {
+    #   host = "${google_compute_instance.host.network_interface.0.access_config.0.nat_ip}"
+    #   user = "ubuntu"
+    # }
     connection {
-      user = "ubuntu"
+      host = "${self.network_interface.0.access_config.0.nat_ip}"
+      type        = "ssh"
+      user        = "ubuntu"
+      timeout     = "500s"
+      private_key = "${file(var.private_key_path)}"
     }
 
     inline = [
@@ -75,7 +83,7 @@ resource "google_compute_instance" "host" {
 resource "google_compute_instance" "vpn" {
   name         = "vpn2"
   machine_type = "n1-standard-1"
-  allow_stopping_for_update = "TRUE"
+  allow_stopping_for_update = true
 
   boot_disk {
     initialize_params {
@@ -85,14 +93,22 @@ resource "google_compute_instance" "vpn" {
 
   network_interface {
     subnetwork    = "${google_compute_subnetwork.live_migration.self_link}"
-    access_config = {
+    access_config {
         nat_ip = "${google_compute_address.vpn.address}"
     }
   }
 
   provisioner "remote-exec" {
+    # connection {
+    #   host = "${google_compute_instance.vpn.network_interface.0.access_config.0.nat_ip}"
+    #   user = "ubuntu"
+    # }
     connection {
-      user = "ubuntu"
+      host = "${self.network_interface.0.access_config.0.nat_ip}"
+      type        = "ssh"
+      user        = "ubuntu"
+      timeout     = "500s"
+      private_key = "${file(var.private_key_path)}"
     }
 
     inline = [

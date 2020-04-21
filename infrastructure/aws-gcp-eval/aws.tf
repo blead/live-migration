@@ -1,9 +1,9 @@
 provider "aws" {
   version    = "=2.7"
-  region     = "ap-southeast-1"
+  region     = "ap-northeast-1"
 }
 
-resource "aws_key_pair" "auth" {
+resource "aws_key_pair" "auth-eval" {
   key_name   = "${var.key_name}"
   public_key = "${file(var.public_key_path)}"
 }
@@ -25,7 +25,7 @@ resource "aws_route" "internet_access" {
 
 resource "aws_route" "to_gcp" {
   route_table_id         = "${aws_vpc.default.main_route_table_id}"
-  destination_cidr_block = "${google_compute_subnetwork.live_migration.ip_cidr_range}"
+  destination_cidr_block = "${google_compute_subnetwork.live_migration-eval.ip_cidr_range}"
   instance_id            = "${aws_instance.vpn.id}"
 }
 
@@ -36,9 +36,9 @@ resource "aws_subnet" "default" {
 }
 
 resource "aws_instance" "host" {
-  ami                    = "ami-0dad20bd1b9c8c004"
-  instance_type          = "t2.micro"
-  key_name               = "${aws_key_pair.auth.id}"
+  ami                    = "ami-07f4cb4629342979c"
+  instance_type          = "t3.medium"
+  key_name               = "${aws_key_pair.auth-eval.id}"
   associate_public_ip_address = true
   subnet_id              = "${aws_subnet.default.id}"
   source_dest_check      = "false"
@@ -69,17 +69,19 @@ resource "aws_instance" "host" {
     }
 
     inline = [
-      "sudo apt-get -y update",
-      "sudo apt-get -y update",
-      "sudo apt-get -y install python",
+      # "export DEBIAN_FRONTEND=noninteractive",
+      # "sudo apt-get -y update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install python",
     ]
   }
 }
 
 resource "aws_instance" "vpn" {
-  ami                    = "ami-0dad20bd1b9c8c004"
-  instance_type          = "t2.micro"
-  key_name               = "${aws_key_pair.auth.id}"
+  ami                    = "ami-07f4cb4629342979c"
+  instance_type          = "t3.small"
+  key_name               = "${aws_key_pair.auth-eval.id}"
   associate_public_ip_address = true
   subnet_id              = "${aws_subnet.default.id}"
   source_dest_check      = "false"
@@ -109,9 +111,11 @@ resource "aws_instance" "vpn" {
     }
 
     inline = [
-      "sudo apt-get -y update",
-      "sudo apt-get -y update",
-      "sudo apt-get -y install python",
+      # "export DEBIAN_FRONTEND=noninteractive",
+      # "sudo apt-get -y update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y update",
+      "sudo DEBIAN_FRONTEND=noninteractive apt-get -y install python",
     ]
   }
 }
