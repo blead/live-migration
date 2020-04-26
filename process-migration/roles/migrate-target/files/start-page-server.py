@@ -23,6 +23,17 @@ def get_pageserver_cmd_and_port(container, port=None):
     print(cmd)
     return cmd, port
 
+def get_predump_pageserver_cmd_and_port(container, port=None):
+    dir = "{}/{}/predump".format(BASE_PATH, container)
+    path = pathlib.Path(dir)
+    path.mkdir(parents=True, exist_ok=True)
+    if port is None:
+        port = find_free_port()
+    cmd = "criu page-server --images-dir {} --port {}".format(dir, port)
+    print(cmd)
+    return cmd, port
+
+
 with open("config.yaml", 'r') as ymlfile:
     cfg = yaml.full_load(ymlfile)
 
@@ -35,6 +46,10 @@ for container in cfg['containers']:
         cmd, port = get_pageserver_cmd_and_port(container['name'])
     print("[{}] running pageserver on port {}".format(container['name'], port))
     commands.append(cmd)
+    if 'predump_port' in container['pageserver']:
+        pageserver_port = container['pageserver']['predump_port']
+        cmd, port = get_predump_pageserver_cmd_and_port(container['name'], pageserver_port)
+        commands.append(cmd)
 
 procs = [ subprocess.Popen(cmd, shell=True) for cmd in commands ]
 for p in procs:

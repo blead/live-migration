@@ -46,7 +46,15 @@ def predump(container):
   container_path = base_path + container
   old_cwd = os.getcwd()
   os.chdir(container_path)
-  cmd = 'runc checkpoint --pre-dump --image-path ' + precopy_dir + ' ' + container
+  cmd = 'runc checkpoint --pre-dump'
+  if pageserver_enabled:
+    if container == 'wordpress':
+      cmd += ' --page-server 10.0.1.5:9095'
+    elif container == 'mysql':
+      cmd += ' --page-server 10.0.1.5:9096'
+    else:
+      exit(1)
+  cmd += ' --image-path ' + precopy_dir + ' ' + container
   start = time.time()
   process = subprocess.Popen(cmd, shell=True)
   ret = process.wait()

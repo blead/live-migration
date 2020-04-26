@@ -2,6 +2,8 @@ containers:
   - name: wordpress
     pageserver:
       port: 9090
+      predump_port: 9095
   - name: mysql
     pageserver:
       port: 9091
+      predump_port: 9096
