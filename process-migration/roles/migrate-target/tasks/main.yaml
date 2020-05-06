@@ -13,23 +13,30 @@
     group: root 
     mode: "0755"
   become: true
-  when: "{{ pageserver | default('false') }}"
+  when: pageserver is defined
 
 - name: Copy config file
   copy: 
     src: config.yaml
     dest: /home/ubuntu/
-  when: "{{ pageserver | default('false') }}"
+  when: pageserver is defined
 
 - name: Start page server
   shell: "./start-page-server.py"
   args:
     chdir: /home/ubuntu
   become: true
-  when: "{{ pageserver | default('false') }}"
+  when: pageserver is defined
   # to make script run in detached mode
   async: 2629800
   poll: 0
+
+- name: Start workload
+  shell: "ssh siege-eval sh workload.sh {{workload}}"
+  delegate_to: localhost
+  async: 2629800
+  poll: 0
+  when: (workload is defined) and ( workload|int > 0)
 
 - name: Create migrate-target script
   copy: src=migrate-target.py dest=/home/ubuntu/migrate-target.py owner=root group=root mode=0755

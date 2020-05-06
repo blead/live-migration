@@ -15,11 +15,12 @@ def find_free_port():
 
 def get_pageserver_cmd_and_port(container, port=None):
     dir = "{}/{}/checkpoint".format(BASE_PATH, container)
+    prev_dir = "{}/{}/predump".format(BASE_PATH, container)
     path = pathlib.Path(dir)
     path.mkdir(parents=True, exist_ok=True)
     if port is None:
         port = find_free_port()
-    cmd = "criu page-server --images-dir {} --port {}".format(dir, port)
+    cmd = "criu page-server --images-dir {} --port {} --auto-dedup --prev-images-dir {}".format(dir, port, prev_dir)
     print(cmd)
     return cmd, port
 
@@ -29,7 +30,7 @@ def get_predump_pageserver_cmd_and_port(container, port=None):
     path.mkdir(parents=True, exist_ok=True)
     if port is None:
         port = find_free_port()
-    cmd = "criu page-server --images-dir {} --port {}".format(dir, port)
+    cmd = "criu page-server --images-dir {} --port {} --auto-dedup".format(dir, port)
     print(cmd)
     return cmd, port
 

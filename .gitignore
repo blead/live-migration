@@ -6,3 +6,5 @@ ansible.log
 /script 
 
 **/live-migration-265717-d6bbbb807404.json
+
+**/result/*

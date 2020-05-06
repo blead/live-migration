@@ -16,12 +16,13 @@ precopy_relative_path = '../' + precopy_dir
 precopy_enabled = False
 postcopy_enabled = False
 pageserver_enabled = False
+autodedup_enabled = False
 postcopy_port_start = 8027
 postcopy_pipe_prefix = '/tmp/postcopy-pipe-'
 target_port = 8888
 
 if len(sys.argv) < 3:
-  print 'Usage: ' + sys.argv[0] + ' <container1>[,<containers2>,...] <target-address> [pre-copy] [pageserver] [post-copy-port-start]'
+  print 'Usage: ' + sys.argv[0] + ' <container1>[,<containers2>,...] <target-address> [pre-copy] [pageserver] [post-copy-port-start] [auto-dedup]'
   sys.exit(1)
 
 containers = sys.argv[1].split(',')
@@ -33,6 +34,8 @@ if len(sys.argv) > 4:
   pageserver_enabled = distutils.util.strtobool(sys.argv[4])
 if len(sys.argv) > 5:
   postcopy_port_start = int(sys.argv[5])
+if len(sys.argv) > 6:
+  autodedup_enabled = distutils.util.strtobool(sys.argv[6])
 postcopy_ports = [postcopy_port_start + i for i in xrange(len(containers))]
 queue = multiprocessing.queues.SimpleQueue()
 
@@ -54,7 +57,10 @@ def predump(container):
       cmd += ' --page-server 10.0.1.5:9096'
     else:
       exit(1)
+  if autodedup_enabled:
+    cmd += ' --auto-dedup'
   cmd += ' --image-path ' + precopy_dir + ' ' + container
+  print 'prudump cmd : %s' % (cmd)
   start = time.time()
   process = subprocess.Popen(cmd, shell=True)
   ret = process.wait()
@@ -82,6 +88,8 @@ def checkpoint((container, postcopy_port)):
       cmd += ' --page-server 10.0.1.5:9091'
     else:
       exit(1)
+  if autodedup_enabled:
+    cmd += ' --auto-dedup'
   if postcopy_enabled:
     cmd += ' --lazy-pages --page-server localhost:' + str(postcopy_port)
     try:
@@ -91,6 +99,7 @@ def checkpoint((container, postcopy_port)):
     os.mkfifo(postcopy_pipe_path)
     cmd += ' --status-fd ' + postcopy_pipe_path
   cmd += ' ' + container
+  print 'checkpoint cmd: %s' % (cmd)
   start = time.time()
   process = subprocess.Popen(cmd, shell=True)
   if postcopy_enabled:
