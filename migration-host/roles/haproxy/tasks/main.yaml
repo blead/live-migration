@@ -21,8 +21,8 @@
   notify: 
     - restart haproxy
 
-- name: ensure haproxy is running
-  service:
-    name: haproxy
-    state: started
+# - name: ensure haproxy is running
+#   service:
+#     name: haproxy
+#     state: started
     

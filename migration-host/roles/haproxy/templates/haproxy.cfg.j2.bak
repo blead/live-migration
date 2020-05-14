@@ -47,12 +47,9 @@ frontend http-default
 	mode http
 	maxconn 100000
 	default_backend back1
-
-frontend stats
-    bind *:8404
-    stats enable
-    stats uri /stats
-    stats refresh 10s
+	stats enable
+	stats uri /haproxy
+	stats hide-version
 	stats auth criu:criu12345
 	stats show-node
 	
@@ -61,11 +58,10 @@ backend back1
 	option forwardfor
 	option httpchk HEAD / HTTP/1.1\r\nHost:\ a.com
 	default-server inter 10s fall 6 rise 1
-	server redir 127.0.0.1:12345 backup disabled maxconn 20
+	server redir 127.0.0.1:12345 backup disabled
 	server source 10.200.1.5:80 check
-	{% for host in list_other_hosts %}
-	{% if not ansible_hostname == hostvars[host].ansible_hostname %}
-	# Host added by Ansible
+	{% for host in groups['host'] %}}
+	{% if not ansible_hostname == hostvars[host].ansible_facts.ansible_hostname %}
 	server target {{ hostvars[host].private_address }}:80 check
 	{% endif %}
 	{% endfor %}
