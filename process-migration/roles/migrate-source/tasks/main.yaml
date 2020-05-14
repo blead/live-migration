@@ -1,16 +1,20 @@
 ---
+
 - name: Create migrate-source script
-  copy: src=migrate-source.py dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
+  copy: src=unscheduled-migrate-source-ps-dedup-rsync.py dest=/home/ubuntu/migrate-source.py owner=root group=root mode=0755
   become: true
 
+
 - name: Migrate MySQL and WordPress
-  command: "./migrate-source.py mysql,wordpress {{ hostvars[target].private_address }} {{ precopy | default('false') }} {{ postcopy | default('false') }} 8027"
+  command: "./migrate-source.py mysql,wordpress {{ hostvars[target].private_address }} {{ precopy | default('false') }} {{ pageserver | default('false') }} 8027 {{ autodedup| default('false') }}"
   args:
     chdir: /home/ubuntu
   environment:
     PYTHONUNBUFFERED: 1
   become: true
   register: migration_result
+
+
 
 - name: Wait for target ({{ hostvars[target].private_address }}) to come up
   command: "curl -m 2 --silent {{ hostvars[target].private_address }}"
@@ -19,10 +23,37 @@
   retries: 20
   delay: 1
   changed_when: false
+  ignore_errors: yes
 
 - name: HAProxy - Disable redir
   shell: echo "disable server back1/redir" | socat unix-connect:/var/run/haproxy/admin.sock stdio
   become: true
 
+- name: Stop workload
+  shell: "ssh siege-eval sh stop-workload.sh"
+  delegate_to: localhost
+  ignore_errors: yes
+  async: 2629800
+  poll: 0
+
+
 - name: Display migration result
   debug: var=migration_result.stdout_lines
+
+# logging 
+
+- name: Ansible check directory.
+  stat:
+    path: result/{{experiment}}/{{workload}}
+  delegate_to: 127.0.0.1
+  register: my_folder
+  when: (experiment is defined) and (workload is defined)
+# - name: "echo if directory already existed"
+#   debug:
+#     msg: "the directory is already existed"
+#   when: my_folder.stat.exists
+
+
+- name: Save result to file
+  local_action: copy content={{ migration_result.stdout_lines }} dest=result/{{experiment}}/{{workload}}/experiment_{{number}}.json
+  when: (experiment is defined) and (workload is defined)

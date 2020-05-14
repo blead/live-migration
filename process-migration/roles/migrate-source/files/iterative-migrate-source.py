@@ -14,8 +14,6 @@ base_path = '/home/ubuntu/'
 precopy_dir = 'predump'
 precopy_relative_path = '../' + precopy_dir
 precopy_enabled = False
-postcopy_enabled = False
-postcopy_port_start = 8027
 postcopy_pipe_prefix = '/tmp/postcopy-pipe-'
 target_port = 8888
 
@@ -27,13 +25,13 @@ if len(sys.argv) < 3:
 
 containers = sys.argv[1].split(',')
 target_address = sys.argv[2]
-if len(sys.argv) > 3:
-  precopy_enabled = distutils.util.strtobool(sys.argv[3])
-if len(sys.argv) > 4:
-  postcopy_enabled = distutils.util.strtobool(sys.argv[4])
-if len(sys.argv) > 5:
-  postcopy_port_start = int(sys.argv[5])
-postcopy_ports = [postcopy_port_start + i for i in range(len(containers))]
+# if len(sys.argv) > 3:
+precopy_enabled = True
+# if len(sys.argv) > 4:
+#   postcopy_enabled = distutils.util.strtobool(sys.argv[4])
+# if len(sys.argv) > 5:
+#   postcopy_port_start = int(sys.argv[5])
+# postcopy_ports = [postcopy_port_start + i for i in range(len(containers))]
 queue = multiprocessing.queues.SimpleQueue()
 
 
@@ -61,34 +59,34 @@ def predump(container):
   if ret != 0 or stderr:
     error(container + ' predump failed.')
 
-def checkpoint(xxx_todo_changeme):
-  (container, postcopy_port) = xxx_todo_changeme
+def checkpoint(container_with_port):
+  (container, postcopy_port) = container_with_port
   container_path = base_path + container
-  postcopy_pipe_path = postcopy_pipe_prefix + container
-  old_cwd = os.getcwd()
+  # postcopy_pipe_path = postcopy_pipe_prefix + container
+  old_cwd = os.getcwd() #full path
   os.chdir(container_path)
   cmd = 'runc checkpoint'
   if precopy_enabled:
     cmd += ' --parent-path ' + precopy_relative_path
-  if postcopy_enabled:
-    cmd += ' --lazy-pages --page-server localhost:' + str(postcopy_port)
-    try:
-      os.unlink(postcopy_pipe_path)
-    except:
-      pass
-    os.mkfifo(postcopy_pipe_path)
-    cmd += ' --status-fd ' + postcopy_pipe_path
+  # if postcopy_enabled:
+  #   cmd += ' --lazy-pages --page-server localhost:' + str(postcopy_port)
+  #   try:
+  #     os.unlink(postcopy_pipe_path)
+  #   except:
+  #     pass
+  #   os.mkfifo(postcopy_pipe_path)
+  #   cmd += ' --status-fd ' + postcopy_pipe_path
   cmd += ' ' + container
   start = time.time()
   process = subprocess.Popen(cmd, shell=True)
-  if postcopy_enabled:
-    pipe = os.open(postcopy_pipe_path, os.O_RDONLY)
-    ret = os.read(pipe, 1)
-    if ret == '\0':
-      print(container + ': ready for lazy page transfer')
-    ret = 0
-  else:
-    ret = process.wait()
+  # if postcopy_enabled:
+  #   pipe = os.open(postcopy_pipe_path, os.O_RDONLY)
+  #   ret = os.read(pipe, 1)
+  #   if ret == '\0':
+  #     print(container + ': ready for lazy page transfer')
+  #   ret = 0
+  # else:
+  ret = process.wait()
   end = time.time()
   print('%s: checkpoint finished after %.2f second(s) with exit code %d' % (container, end - start, ret))
   eval_process = subprocess.Popen('du -sh ' + container_path + '/checkpoint', shell=True, stdout=subprocess.PIPE)

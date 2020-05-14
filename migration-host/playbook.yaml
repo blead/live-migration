@@ -13,7 +13,7 @@
   - pam-limits
   - memcached
   - flask-gunicorn
-  - haproxy
+  # - haproxy
 
 - hosts: "{{ source | default('source') }}"
   roles:

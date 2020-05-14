@@ -2,3 +2,9 @@ hosts
 playbook.retry
 .vscode/
 ansible.log
+.vagrant
+/script 
+
+**/live-migration-265717-d6bbbb807404.json
+
+**/result/*

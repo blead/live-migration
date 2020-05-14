@@ -12,30 +12,13 @@ HOST = ''   # Symbolic name meaning all available interfaces
 PORT = 8888 # Arbitrary non-privileged port
 
 if len(sys.argv) < 2:
-  print 'Usage: ' + sys.argv[0] + ' <source>' + ' [page_server]'
+  print 'Usage: ' + sys.argv[0] + ' <source>'
   sys.exit(1)
 
 source_addr = sys.argv[1]
 
-pageserver_enabled = False
-if len(sys.argv) > 2:
-  pageserver_enabled = distutils.util.strtobool(sys.argv[2])
-
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print 'Socket created'
-
-#Bind socket to local host and port
-try:
-  s.bind((HOST, PORT))
-except socket.error as msg:
-  print 'Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1]
-  sys.exit()
-
-print 'Socket bind complete'
-
-#Start listening on socket
-s.listen(10)
-print 'Socket now listening'
 
 #Function for handling connections. This will be used to create threads
 def clientthread(conn, addr):
@@ -81,8 +64,8 @@ def clientthread(conn, addr):
           lp = subprocess.Popen(page_server_cmd, shell=True)
           ret = os.read(p_pipe, 1)
         cmd = 'runc restore -d --image-path ' + image_path + ' --work-path ' + image_path
-        if lazy:
-          cmd += ' --lazy-pages'
+        # if lazy:
+        #   cmd += ' --lazy-pages'
         cmd += ' ' + msg['restore']['container'] + ' > ../' + msg['restore']['container'] + '_log.txt 2>&1'
         print "Running " +  cmd
         p = subprocess.Popen(cmd, shell=True)

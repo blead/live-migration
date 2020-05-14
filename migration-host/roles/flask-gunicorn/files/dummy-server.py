@@ -18,7 +18,7 @@ def delayed_redirect(path):
             return 'Target is still offline after 5 minutes. Check the migration log and try again.'
         else:
             if monitor_target():
-                return redirect('http://34.85.25.171', code=302)
+                return redirect('http://35.243.95.199', code=302)
             else:
                 print time.time() - default_timer
                 continue
@@ -30,7 +30,7 @@ def monitor_target():
         return True
     time.sleep(1)
     try:
-        req = requests.get('http://10.0.1.2')
+        req = requests.get('http://10.0.1.5')
         if req.status_code == 200:
             # Target is ready :)
             # Update the cache

@@ -10,9 +10,9 @@ data "template_file" "ansible_aws_host" {
 data "template_file" "ansible_gcp_host" {
   template = "${file("${path.module}/host.tpl")}"
   vars = {
-    public_ip  = "${google_compute_instance.host.network_interface.0.access_config.0.nat_ip}"
-    private_ip = "${google_compute_instance.host.network_interface.0.network_ip}"
-    private_subnet = "${google_compute_subnetwork.live_migration.ip_cidr_range}"
+    public_ip  = "${google_compute_instance.host-eval.network_interface.0.access_config.0.nat_ip}"
+    private_ip = "${google_compute_instance.host-eval.network_interface.0.network_ip}"
+    private_subnet = "${google_compute_subnetwork.live_migration-eval.ip_cidr_range}"
   }
 }
 
@@ -28,9 +28,9 @@ data "template_file" "ansible_aws_vpn" {
 data "template_file" "ansible_gcp_vpn" {
   template = "${file("${path.module}/host.tpl")}"
   vars = {
-    public_ip  = "${google_compute_instance.vpn.network_interface.0.access_config.0.nat_ip}"
-    private_ip = "${google_compute_instance.vpn.network_interface.0.network_ip}"
-    private_subnet = "${google_compute_subnetwork.live_migration.ip_cidr_range}"
+    public_ip  = "${google_compute_instance.vpn-eval.network_interface.0.access_config.0.nat_ip}"
+    private_ip = "${google_compute_instance.vpn-eval.network_interface.0.network_ip}"
+    private_subnet = "${google_compute_subnetwork.live_migration-eval.ip_cidr_range}"
   }
 }
 
