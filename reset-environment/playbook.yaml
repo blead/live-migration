@@ -1,14 +1,14 @@
 ---
 - hosts: host
   roles:
-  - container
-  - image
-  - ports
-  - iptables
+  # - container
+  # - image
+  # - ports
+  # - iptables
   - netns
-  - rsync
+  # - rsync
 
 - hosts: "{{ source | default('source') }}"
   roles:
-  - haproxy
-  - memcached
+  # - haproxy
+  # - memcached
