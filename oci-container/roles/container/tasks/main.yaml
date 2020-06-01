@@ -6,6 +6,7 @@
   args:
     chdir: /home/ubuntu/mysql
   become: true
+  tags: container
 
 - name: Start WordPress container
   shell: runc run -d wordpress &>/dev/null </dev/null
@@ -13,3 +14,4 @@
   args:
     chdir: /home/ubuntu/wordpress
   become: true
+  tags: container
